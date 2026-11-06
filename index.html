@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Karta o‘yini</title>
     <style>
         :root {
@@ -18,17 +19,27 @@
             overflow: hidden;
             font-family: Arial, Helvetica, sans-serif;
             -webkit-user-select: none;
-            user-select: none
+            user-select: none;
+            touch-action: manipulation;
+            overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%
+        }
+
+        body {
+            position: fixed;
+            inset: 0;
+            width: 100%
         }
 
         #st {
             position: absolute;
-            left: 50%;
-            top: 50%;
+            left: 0;
+            top: 0;
             width: 576px;
             height: 1280px;
             overflow: hidden;
-            transform-origin: center;
+            transform-origin: 0 0;
             background: #000
         }
 
@@ -560,24 +571,24 @@
         // Rasm topilmasa, o‘rniga bo‘sh joy (placeholder) ko‘rinadi.
         const PHOTOS = ['img1', 'img2', 'img3', 'img4'];
         const EXT = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'JPEG', 'PNG'];
-        function nx(e) {const k = (+e.dataset.k || 0) + 1; e.dataset.k = k; if (k < EXT.length) e.src = e.dataset.b + '.' + EXT[k]; else e.remove()}
+        function nx(e) { const k = (+e.dataset.k || 0) + 1; e.dataset.k = k; if (k < EXT.length) e.src = e.dataset.b + '.' + EXT[k]; else e.remove() }
         // ===================
         const $ = s => document.querySelector(s), sleep = ms => new Promise(r => setTimeout(r, ms));
         const st = $('#st'), cards = $('#cards'), world = $('#world'), msg = $('#msg');
-        function fit() {st.style.transform = 'translate(-50%,-50%) scale(' + Math.min(innerWidth / 576, innerHeight / 1280) + ')'}
-        addEventListener('resize', fit); fit();
-        const SU = {H: ['♥', '#e0202a'], S: ['♠', '#111'], D: ['♦', '#1f6fd6'], C: ['♣', '#1c9a3c']};
-        const VAL = {6: 6, 7: 7, 8: 8, K: 40, Q: 20, J: 2};
-        function T(el, x, y, r = 0, s = 1) {el.style.transform = `translate(${x - 87.5}px,${y - 122.5}px) rotate(${r}deg) scale(${s})`}
+        function fit() { const W = innerWidth, H = innerHeight, s = Math.min(W / 576, H / 1280), top = H - 1280 * s, left = (W - 576 * s) / 2; st.style.transform = 'translate(' + left + 'px,' + top + 'px) scale(' + s + ')'; document.body.style.background = 'linear-gradient(#000 ' + (top + 45 * s) + 'px,#17293d ' + (top + 45 * s) + 'px)' }
+        addEventListener('resize', fit); addEventListener('orientationchange', () => setTimeout(fit, 200)); if (window.visualViewport) visualViewport.addEventListener('resize', fit); fit();
+        const SU = { H: ['♥', '#e0202a'], S: ['♠', '#111'], D: ['♦', '#1f6fd6'], C: ['♣', '#1c9a3c'] };
+        const VAL = { 6: 6, 7: 7, 8: 8, K: 40, Q: 20, J: 2 };
+        function T(el, x, y, r = 0, s = 1) { el.style.transform = `translate(${x - 87.5}px,${y - 122.5}px) rotate(${r}deg) scale(${s})` }
         function fig(rank, col) {
             const q = rank === 'Q', j = rank === 'J', robe = q ? '#d83a3a' : j ? '#2f6fd0' : '#2f5fb0';
             return `<svg class="fig" viewBox="0 0 100 130"><path d="M4 130 Q10 82 50 78 Q90 82 96 130Z" fill="${robe}"/><path d="M40 82 L50 100 L60 82Z" fill="#f2d27a"/>${q ? '<path d="M28 50 Q50 14 72 50 L80 112 L20 112Z" fill="#fff" opacity=".92"/>' : ''}<circle cx="50" cy="56" r="17" fill="#e8b890"/>${q || j ? '' : '<path d="M33 58 Q50 104 67 58 Q50 72 33 58Z" fill="#e4e4e4"/>'}<circle cx="43" cy="53" r="2" fill="#222"/><circle cx="57" cy="53" r="2" fill="#222"/>${j ? '<path d="M28 44 Q50 4 72 44Z" fill="#2a58c0"/><path d="M24 46 L76 46 L72 37 L28 37Z" fill="#1c3f8f"/>' : '<path d="M30 42 L33 20 L42 33 L50 14 L58 33 L67 20 L70 42Z" fill="#e8b020" stroke="#b07810" stroke-width="1.5"/>'}<circle cx="50" cy="94" r="5" fill="${col}"/></svg>`
         }
-        const PIPS = {6: [[1, 55], [2, 55], [1, 122], [2, 122], [1, 190], [2, 190]]};
+        const PIPS = { 6: [[1, 55], [2, 55], [1, 122], [2, 122], [1, 190], [2, 190]] };
         PIPS[7] = PIPS[6].concat([[0, 88]]); PIPS[8] = PIPS[6].concat([[0, 88], [0, 157]]);
         function face(rank, suit) {
             const [s, c] = SU[suit]; let h = `<div class="ix" style="color:${c}"><b>${rank}</b>${/[KQJ]/.test(rank) ? '<sup>' + VAL[rank] + '</sup>' : ''}<i>${s}</i></div>`;
-            if (PIPS[rank]) PIPS[rank].forEach(([k, y]) => {h += `<span class="pip${y > 122 ? ' f' : ''}" style="left:${[88, 56, 124][k]}px;top:${y + 14}px;color:${c}">${s}</span>`});
+            if (PIPS[rank]) PIPS[rank].forEach(([k, y]) => { h += `<span class="pip${y > 122 ? ' f' : ''}" style="left:${[88, 56, 124][k]}px;top:${y + 14}px;color:${c}">${s}</span>` });
             else h += fig(rank, c);
             return h
         }
@@ -585,9 +596,9 @@
         function photo(i) {
             return `<div class="ph" style="background:linear-gradient(160deg,${GR[i]})"><div class="pl"><svg viewBox="0 0 100 100"><circle cx="50" cy="36" r="20" fill="rgba(255,255,255,.85)"/><path d="M10 100 Q14 62 50 60 Q86 62 90 100Z" fill="rgba(255,255,255,.85)"/></svg>RASM ${i + 1}</div><img src="${PHOTOS[i]}.jpg" alt="" data-b="${PHOTOS[i]}" onerror="nx(this)"></div><div class="edge"></div>`
         }
-        function mk() {const e = document.createElement('div'); e.className = 'card back'; e.innerHTML = '<div class="inner"></div>'; cards.appendChild(e); return e}
-        async function flip(el, html) {const i = el.firstChild; i.style.transform = 'scaleX(0)'; await sleep(330); el.classList.remove('back'); i.innerHTML = html; i.style.transform = 'scaleX(1)'}
-        function setFace(el, html) {el.classList.remove('back'); el.firstChild.innerHTML = html}
+        function mk() { const e = document.createElement('div'); e.className = 'card back'; e.innerHTML = '<div class="inner"></div>'; cards.appendChild(e); return e }
+        async function flip(el, html) { const i = el.firstChild; i.style.transform = 'scaleX(0)'; await sleep(330); el.classList.remove('back'); i.innerHTML = html; i.style.transform = 'scaleX(1)' }
+        function setFace(el, html) { el.classList.remove('back'); el.firstChild.innerHTML = html }
         // statik elementlar
         const dk = document.createElement('div'); dk.className = 'card back'; dk.innerHTML = '<div class="inner"></div>'; $('#deck').appendChild(dk); T(dk, 98, 517, 0, .81);
         const tri = $('#tri'), hint = $('#hint'), av = $('#av'), opp = $('#opp'), take = $('#take'), pts = $('#pts');
@@ -597,31 +608,31 @@
             hint.innerHTML = h || ''
         }
         function shake() {
-            world.animate([{transform: 'translate(0,0)'}, {transform: 'translate(-14px,9px)'}, {transform: 'translate(12px,-10px)'}, {transform: 'translate(-8px,6px)'}, {transform: 'translate(0,0)'}], {duration: 260});
-            const f = $('#flash'); f.animate([{opacity: .55}, {opacity: 0}], {duration: 240})
+            world.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-14px,9px)' }, { transform: 'translate(12px,-10px)' }, { transform: 'translate(-8px,6px)' }, { transform: 'translate(0,0)' }], { duration: 260 });
+            const f = $('#flash'); f.animate([{ opacity: .55 }, { opacity: 0 }], { duration: 240 })
         }
         function confetti() {
             const c = $('#fx'), x = c.getContext('2d'), P = [], cols = ['#ffd35c', '#ff5d73', '#5dd6ff', '#9bf06b', '#d18bff'];
-            for (let i = 0; i < 140; i++)P.push({x: Math.random() * 576, y: -Math.random() * 500, vx: Math.random() * 2 - 1, vy: 2 + Math.random() * 4, r: Math.random() * 6, s: 5 + Math.random() * 7, c: cols[i % 5]});
-            let n = 0; (function f() {x.clearRect(0, 0, 576, 1280); P.forEach(p => {p.x += p.vx; p.y += p.vy; p.r += .1; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore()}); if (++n < 420) requestAnimationFrame(f); else x.clearRect(0, 0, 576, 1280)})()
+            for (let i = 0; i < 140; i++)P.push({ x: Math.random() * 576, y: -Math.random() * 500, vx: Math.random() * 2 - 1, vy: 2 + Math.random() * 4, r: Math.random() * 6, s: 5 + Math.random() * 7, c: cols[i % 5] });
+            let n = 0; (function f() { x.clearRect(0, 0, 576, 1280); P.forEach(p => { p.x += p.vx; p.y += p.vy; p.r += .1; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore() }); if (++n < 420) requestAnimationFrame(f); else x.clearRect(0, 0, 576, 1280) })()
         }
         const emo = $('#emo');
         let ek = 0;
-        async function pop(ch) {const k = ++ek; if (emo.classList.contains('s')) {emo.classList.add('out'); await sleep(300); if (k !== ek) return; emo.textContent = ch; emo.classList.remove('out')} else {emo.textContent = ch; emo.classList.add('s')} }
-        function hide() {ek++; emo.classList.remove('s', 'out')}
+        async function pop(ch) { const k = ++ek; if (emo.classList.contains('s')) { emo.classList.add('out'); await sleep(300); if (k !== ek) return; emo.textContent = ch; emo.classList.remove('out') } else { emo.textContent = ch; emo.classList.add('s') } }
+        function hide() { ek++; emo.classList.remove('s', 'out') }
         let rid = 0;
         async function run() {
-            const id = ++rid, w = async ms => {await sleep(ms); if (id !== rid) throw 0};
+            const id = ++rid, w = async ms => { await sleep(ms); if (id !== rid) throw 0 };
             try {
                 cards.innerHTML = ''; msg.classList.remove('show'); msg.querySelectorAll('p').forEach(p => p.classList.remove('v')); $('#again').classList.remove('v');
                 $('#fx').getContext('2d').clearRect(0, 0, 576, 1280); pts.textContent = 25; $('#conn').style.opacity = 1; turn('me', ''); emo.style.left = '248px'; emo.style.top = '112px'; hide();
                 let z = 1;
 
                 const H = [['8', 'H'], ['8', 'S'], ['J', 'S'], ['7', 'C']], hx = [90, 235, 380, 520], hr = [-7, -2, 3, 8], hy = [1055, 1038, 1038, 1055];
-                const hand = H.map((c, i) => {const e = mk(); setFace(e, face(...c)); e.style.transition = 'none'; T(e, hx[i], 1400, hr[i]); e.offsetWidth; e.style.transition = ''; e.style.zIndex = 10 + i; return e});
+                const hand = H.map((c, i) => { const e = mk(); setFace(e, face(...c)); e.style.transition = 'none'; T(e, hx[i], 1400, hr[i]); e.offsetWidth; e.style.transition = ''; e.style.zIndex = 10 + i; return e });
                 await w(600); hand.forEach((e, i) => T(e, hx[i], hy[i], hr[i]));
                 // opponent stack
-                const op = [0, 1, 2, 3].map(i => {const e = mk(); e.style.zIndex = 5; T(e, 288, 190, [-6, -2, 2, 6][i], .55); return e});
+                const op = [0, 1, 2, 3].map(i => { const e = mk(); e.style.zIndex = 5; T(e, 288, 190, [-6, -2, 2, 6][i], .55); return e });
                 await w(2400); $('#conn').style.opacity = 0;
                 // qiz: 8♥, 8♠, K♠
                 const jit = [[-12, 8, 6], [14, -6, -10], [-4, 18, 12]];
@@ -631,14 +642,14 @@
                     e.style.zIndex = z++; T(e, 300 + jx, 525 + jy, jr, 1); pts.textContent = +pts.textContent - VAL[H[i][0]]; await w(1300);
                 }
                 const played = [true, false, false, false]; let busy = false;
-                const wig = e => e.firstChild.animate([{transform: 'translateX(0)'}, {transform: 'translateX(-12px)'}, {transform: 'translateX(10px)'}, {transform: 'translateX(-6px)'}, {transform: 'translateX(0)'}], {duration: 320});
+                const wig = e => e.firstChild.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-12px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(0)' }], { duration: 320 });
                 const mark = () => hand.forEach((e, i) => e.classList.toggle('hl', (i === 1 && !played[1]) || (i === 2 && played[1] && !played[2])));
                 await new Promise(res => {
                     mark();
                     hand.forEach((e, i) => {
                         if (!i) return; e.style.cursor = 'pointer'; e.onclick = async () => {
                             if (id !== rid || busy || played[i]) return;
-                            if (!(i === 1 || (i === 2 && played[1]))) {wig(e); return }
+                            if (!(i === 1 || (i === 2 && played[1]))) { wig(e); return }
                             busy = true; played[i] = true; mark();
                             const [jx, jy, jr] = jit[i]; T(e, hx[i], hy[i] - 70, 0, 1.1); await sleep(450);
                             e.style.zIndex = z++; T(e, 300 + jx, 525 + jy, jr, 1); pts.textContent = +pts.textContent - VAL[H[i][0]];
@@ -646,7 +657,7 @@
                         }
                     });
                 });
-                hand.forEach(e => {e.onclick = null; e.style.cursor = ''});
+                hand.forEach(e => { e.onclick = null; e.style.cursor = '' });
                 turn('opp', ''); T(hand[3], 288, 1040, 0); await w(2000);
                 // raqib: kartalar yoyiladi
                 const sx = [92, 230, 368, 506], sr = [-9, -3, 3, 9];
@@ -654,8 +665,8 @@
                 pop('😫'); await w(2300); hide(); await w(700);
                 pop('😥'); await w(2400);
                 pop('🤗'); await w(1300);
-                op.forEach((e, i) => {T(e, sx[i], 300, sr[i], .82)}); await w(1400);
-                for (let i = 0; i < 4; i++) {flip(op[i], photo(i)); await w(520)}
+                op.forEach((e, i) => { T(e, sx[i], 300, sr[i], .82) }); await w(1400);
+                for (let i = 0; i < 4; i++) { flip(op[i], photo(i)); await w(520) }
                 pop('😎');
                 await w(1500);
                 // shiddatli tashlash
@@ -668,10 +679,10 @@
                 }
                 await w(900);
                 await w(800); msg.classList.add('show'); confetti();
-                const ps = msg.querySelectorAll('p'); for (const p of ps) {await w(2100); p.classList.add('v')}
+                const ps = msg.querySelectorAll('p'); for (const p of ps) { await w(2100); p.classList.add('v') }
                 await w(1200); emo.style.left = '462px'; emo.style.top = '18px'; await w(600); pop('😍');
                 await w(2400); $('#again').classList.add('v');
-            } catch (e) {if (e !== 0) throw e}
+            } catch (e) { if (e !== 0) throw e }
         }
         run();
     </script>
